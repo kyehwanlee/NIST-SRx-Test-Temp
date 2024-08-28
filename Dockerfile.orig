@@ -31,6 +31,29 @@ RUN autoreconf -i
 RUN ./configure --prefix=/usr CFLAGS="-O0 -g"
 RUN make all install && ldconfig
 
+exit
+
+WORKDIR /root/srx-server
+RUN autoreconf -i
+RUN ./configure --prefix=/usr sca_dir=/usr --cache-file=/dev/null --srcdir=.
+RUN make all install && ldconfig
+
+
+WORKDIR /root/quagga-srx
+RUN autoreconf -i
+RUN ./configure --prefix=/usr --disable-snmp --disable-ospfapi --disable-ospfd --disable-ospf6d \
+    --disable-babeld --disable-doc --disable-tests --enable-user=root --enable-group=root \
+    --enable-configfile-mask=0644 --enable-logfile-mask=0644 \
+    --enable-srxcryptoapi sca_dir=/usr srx_dir=/usr
+RUN make all install && ldconfig
+
+
+# SRxCryptoAPI post scripts 
+WORKDIR /root
+RUN /bin/cp -rf examples/bgpsec-keys /usr/opt/bgp-srx-examples/ \
+        && /bin/cp -rf quagga-srx/bgpd/bgpd.conf.sampleSRx /usr/etc/bgpd.conf \
+        && rm -rf /etc/ld.so.cache && ldconfig
+
 
 EXPOSE 2605 179 17900 17901 323
 CMD ["sleep", "infinity"]
