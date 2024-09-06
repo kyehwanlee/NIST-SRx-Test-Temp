@@ -7,14 +7,14 @@ FROM centos:7
 MAINTAINER "Kyehwan Lee".
 ENV container docker
 
+RUN sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
+RUN sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo     
+RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo 
 
+RUN yum -y install epel-release 
+RUN yum -y install wget libconfig libconfig-devel openssl openssl-devel libcrypto.so.* telnet less gcc
+RUN yum -y install uthash-devel net-snmp readline-devel patch git net-snmp-config net-snmp-devel automake rpm-build autoconf libtool
 ################## BEGIN INSTALLATION ######################
-sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
-sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo     
-sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo 
-yum -y install epel-release 
-yum -y install wget libconfig libconfig-devel openssl openssl-devel libcrypto.so.* telnet less gcc
-yum -y install uthash-devel net-snmp readline-devel patch git net-snmp-config net-snmp-devel automake rpm-build autoconf libtool
 
 COPY . /root/
 
@@ -34,11 +34,3 @@ RUN make all install && ldconfig
 
 EXPOSE 2605 179 17900 17901 323
 CMD ["sleep", "infinity"]
-
-
-############# DOCKER RUN command example #####################################
-# docker run -ti \
-#       -p 179:179 -p 17900:17900 -p 17901:17901 -p 2605:2605 -p 323:323 \
-#       -v $PWD/examples/bgpsec-keys/:/usr/opt/bgp-srx-examples/bgpsec-keys/ \
-#       <docker_image> [command]
-##############################################################################
